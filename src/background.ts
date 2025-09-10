@@ -5,7 +5,7 @@ async function sendRequest(
   sender: any,
   sendResponse: (...params: any) => void
 ) {
-  console.log('Get message: ', message, sender, sendResponse);
+  console.log('Request: ', message, sender);
 
   try {
     const response = await fetch(message.url, message?.init);

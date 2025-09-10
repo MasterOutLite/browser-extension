@@ -1,5 +1,3 @@
-import browser from 'webextension-polyfill';
-
 const pandingTime = 5000;
 const cardSelector = '#mosaic-provider-jobcards > ul > li';
 const nameSelector = 'span[id^="jobTitle-"]';
@@ -44,9 +42,11 @@ function getNewItemsByNameAndRef(
   readedDates: IReturnList[],
   savedDate: IReturnList[]
 ): IReturnList[] {
-  const savedKeys = new Set(savedDate.map((d) => `${d.name}|${d.ref}`));
+  const formatKey = (v: IReturnList) => `${v.name}`;
 
-  return readedDates.filter((d) => !savedKeys.has(`${d.name}|${d.ref}`));
+  const savedKeys = new Set(savedDate.map(formatKey));
+
+  return readedDates.filter((d) => !savedKeys.has(formatKey(d)));
 }
 
 function sendDataToTable(data: IReturnList[]): RequestInit {
@@ -77,49 +77,64 @@ async function worker() {
 
   // пошук нових даних
   const newData = getNewItemsByNameAndRef(readedDates, savedDate);
-  // console.log('Нові дані: ', newData);
 
   // обєднання списку для майбутньої перевірки
+  const combined = [...savedDate, ...readedDates];
+  const newDataForSave = Array.from(
+    new Map(combined.map((item) => [item.name, item])).values()
+  );
 
-  const newDataForSave = Array.from(new Set([...savedDate, ...readedDates]));
+  console.log(new Map(combined.map((item) => [item.name, item])).keys());
 
-  // console.log('newDataForSave: ', newData);
+  console.log('newDataForSave: ', { newData, newDataForSave, savedDate });
 
   // Надсилаємо дані у background script
-
   if (Boolean(newData.length)) {
-    const response = await browser.runtime.sendMessage(browser.runtime.id, {
+    const response = await chrome.runtime.sendMessage({
       url: urlMacros,
       init: sendDataToTable(newData) as RequestInit,
     });
+
     console.log('Дані додані', response);
     if (response?.success) {
-      console.log('Дані додані', response.result);
       localStorage.setItem(keyReadedData, JSON.stringify(newDataForSave));
       location.reload();
+      console.log(' location.reload');
     } else {
       console.error('Помилка надсилання даних', response.error);
     }
   } else {
     location.reload();
+    console.log(' location.reload not find newData');
   }
 }
 
-let isRuning: any = null;
-async function startWorker() {
-  console.log('startWorker: ');
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-  const { scraperRunning } = await browser.storage.local.get('scraperRunning');
-  if (scraperRunning && !isRuning) {
-    console.log('Автозапуск Job scraper після перезавантаження');
-    isRuning = setInterval(worker, pandingTime);
-  } else if (!scraperRunning && isRuning) {
-    clearInterval(isRuning);
+let isRunning: boolean = false;
+async function startWorker() {
+  const domain = window.location.hostname;
+  const storageData = await chrome.storage.local.get('domains');
+  const domains = storageData.domains || {};
+  const scraperRunning = domains[domain]?.scraperRunning;
+  // const { scraperRunning } = await chrome.storage.local.get('scraperRunning');
+  console.log({ domain, storageData, scraperRunning });
+
+  if (!scraperRunning || isRunning) return;
+
+  isRunning = true;
+  try {
+    await sleep(pandingTime);
+    await worker();
+  } finally {
+    isRunning = false;
+    // setTimeout(startWorker, pandingTime);
   }
 }
 
 document.addEventListener('start-job-scraper', async function () {
-  await browser.storage.local.set({ scraperRunning: true });
   startWorker();
 });
 

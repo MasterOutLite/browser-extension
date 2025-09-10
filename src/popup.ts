@@ -1,24 +1,26 @@
-import browser from 'webextension-polyfill';
-
-let interval: any = null;
-
 document.getElementById('start-worker')?.addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({
     active: true,
     currentWindow: true,
   });
 
-  if (interval) return;
+  if (!tab.url) return;
 
-  interval = true;
   // Інжектуємо файл index.js
-  await browser.tabs.executeScript({
-    file: 'index.js',
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id! },
+    files: ['src/content-scripts/index.js'],
   });
 
-  console.log('Invoke job-scraper');
+  const domain = new URL(tab.url).hostname;
+  const storageData = await chrome.storage.local.get('domains');
+  const domains = storageData.domains || {};
+
+  domains[domain] = { scraperRunning: true };
+  await chrome.storage.local.set({ domains });
+
   chrome.scripting.executeScript({
-    target: { tabId: tab.id },
+    target: { tabId: tab.id! },
     func: () => {
       const event = new Event('start-job-scraper');
       document.dispatchEvent(event);
@@ -28,7 +30,19 @@ document.getElementById('start-worker')?.addEventListener('click', async () => {
 });
 
 document.getElementById('stop-worker')?.addEventListener('click', async () => {
-  await browser.storage.local.set({ scraperRunning: false });
+  const [tab] = await chrome.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+
+  if (!tab.url) return;
+
+  const domain = new URL(tab.url).hostname;
+  const storageData = await chrome.storage.local.get('domains');
+  const domains = storageData.domains || {};
+
+  domains[domain] = { scraperRunning: false };
+  await chrome.storage.local.set({ domains });
 });
 
 document.getElementById('close-window')?.addEventListener('click', () => {
