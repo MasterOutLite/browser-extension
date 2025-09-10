@@ -1,4 +1,4 @@
-const pandingTime = 5000;
+const pandingTime = 15000;
 const cardSelector = '#mosaic-provider-jobcards > ul > li';
 const nameSelector = 'span[id^="jobTitle-"]';
 const refSelector = 'a[id^="job_"]';
