@@ -20,8 +20,6 @@ function readData(
 
   const cardListEl = document.querySelectorAll(cardSelector);
 
-  // console.log('cardListEl: ', cardListEl);
-
   cardListEl.forEach((card) => {
     const nameEl = card.querySelector(nameSelector);
     const refEl = card.querySelector<HTMLAnchorElement>(refSelector);
@@ -34,7 +32,6 @@ function readData(
     if (Boolean(data.name) || Boolean(data.ref)) returnList.push(data);
   });
 
-  // console.log('returnList: ', returnList);
   return returnList;
 }
 
@@ -84,10 +81,6 @@ async function worker() {
     new Map(combined.map((item) => [item.name, item])).values()
   );
 
-  console.log(new Map(combined.map((item) => [item.name, item])).keys());
-
-  console.log('newDataForSave: ', { newData, newDataForSave, savedDate });
-
   // Надсилаємо дані у background script
   if (Boolean(newData.length)) {
     const response = await chrome.runtime.sendMessage({
@@ -95,7 +88,6 @@ async function worker() {
       init: sendDataToTable(newData) as RequestInit,
     });
 
-    console.log('Дані додані', response);
     if (response?.success) {
       localStorage.setItem(keyReadedData, JSON.stringify(newDataForSave));
       location.reload();
@@ -119,7 +111,7 @@ async function startWorker() {
   const storageData = await chrome.storage.local.get('domains');
   const domains = storageData.domains || {};
   const scraperRunning = domains[domain]?.scraperRunning;
-  // const { scraperRunning } = await chrome.storage.local.get('scraperRunning');
+
   console.log({ domain, storageData, scraperRunning });
 
   if (!scraperRunning || isRunning) return;
