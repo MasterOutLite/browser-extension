@@ -1,3 +1,5 @@
+import { setDomainConfig } from './utils/index.js';
+
 document.getElementById('start-worker')?.addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({
     active: true,
@@ -13,11 +15,8 @@ document.getElementById('start-worker')?.addEventListener('click', async () => {
   });
 
   const domain = new URL(tab.url).hostname;
-  const storageData = await chrome.storage.local.get('domains');
-  const domains = storageData.domains || {};
 
-  domains[domain] = { scraperRunning: true };
-  await chrome.storage.local.set({ domains });
+  await setDomainConfig(domain, { scraperRunning: true });
 
   chrome.scripting.executeScript({
     target: { tabId: tab.id! },
@@ -38,11 +37,7 @@ document.getElementById('stop-worker')?.addEventListener('click', async () => {
   if (!tab.url) return;
 
   const domain = new URL(tab.url).hostname;
-  const storageData = await chrome.storage.local.get('domains');
-  const domains = storageData.domains || {};
-
-  domains[domain] = { scraperRunning: false };
-  await chrome.storage.local.set({ domains });
+  setDomainConfig(domain, { scraperRunning: false });
 });
 
 document.getElementById('close-window')?.addEventListener('click', () => {

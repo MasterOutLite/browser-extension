@@ -24,3 +24,9 @@
   margin: 0;
   padding: 0;
 }
+
+.regular-field {
+  padding: 4px 6px;
+
+  border-radius: 6px;
+}
