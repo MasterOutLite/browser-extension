@@ -1,0 +1,26 @@
+.container {
+  padding: 10px 20px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.regular-btn {
+  border-radius: 10px;
+  padding: 10px 20px;
+  background: #fff;
+}
+
+.regular-btn:active,
+.regular-btn:focus {
+  background: #81b975;
+  border-color: #a9b975;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
