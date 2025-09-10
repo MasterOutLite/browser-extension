@@ -1,3 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-width: 280px;
+}
+
+.pt-10 {
+  padding-top: 10px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
 .container {
   padding: 10px 20px;
 }
@@ -10,23 +35,34 @@
 
 .regular-btn {
   border-radius: 10px;
-  padding: 10px 20px;
+  padding: 6px 16px;
   background: #fff;
+
+  box-sizing: border-box;
+  border: 2px solid #3a3333;
 }
 
 .regular-btn:active,
 .regular-btn:focus {
+  color: #fff;
   background: #81b975;
-  border-color: #a9b975;
-}
-
-* {
-  margin: 0;
-  padding: 0;
+  border-color: #047e82;
 }
 
 .regular-field {
   padding: 4px 6px;
 
   border-radius: 6px;
+}
+
+.field-label {
+  margin-left: 6px;
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }

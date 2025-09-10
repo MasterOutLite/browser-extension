@@ -1,9 +1,9 @@
-import { defineConfig } from "vite";
-import webExtension, { readJsonFile } from "vite-plugin-web-extension";
+import { defineConfig } from 'vite';
+import webExtension, { readJsonFile } from 'vite-plugin-web-extension';
 
 function generateManifest() {
-  const manifest = readJsonFile("src/manifest.json");
-  const pkg = readJsonFile("package.json");
+  const manifest = readJsonFile('src/manifest.json');
+  const pkg = readJsonFile('package.json');
   return {
     name: pkg.name,
     description: pkg.description,
@@ -14,9 +14,10 @@ function generateManifest() {
 
 export default defineConfig({
   plugins: [
+    /// @ts-ignore
     webExtension({
       manifest: generateManifest,
-      watchFilePaths: ["package.json", "manifest.json"],
+      watchFilePaths: ['package.json', 'manifest.json'],
     }),
   ],
 });

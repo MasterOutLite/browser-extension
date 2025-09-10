@@ -1,10 +1,11 @@
-const pandingTime = 15000;
+import { isValidUrl } from './utils';
+
 const cardSelector = '#mosaic-provider-jobcards > ul > li';
 const nameSelector = 'span[id^="jobTitle-"]';
 const refSelector = 'a[id^="job_"]';
 const keyReadedData = 'ReadedData';
-const urlMacros: string =
-  'https://script.google.com/macros/s/AKfycbxSJaHMfgwdr2P5QGAIzTgFeA2BaQjApWR1AMKFceCLPjVBnRjTMBAjYaGGQEHtuXO5/exec';
+// const urlMacros: string =
+//   'https://script.google.com/macros/s/AKfycbxSJaHMfgwdr2P5QGAIzTgFeA2BaQjApWR1AMKFceCLPjVBnRjTMBAjYaGGQEHtuXO5/exec';
 
 interface IReturnList {
   name: string;
@@ -60,7 +61,7 @@ function sendDataToTable(data: IReturnList[]): RequestInit {
   };
 }
 
-async function worker() {
+async function worker(urlMacros: string = '') {
   const readedDates = readData(cardSelector, nameSelector, refSelector);
 
   // отримання даних із стореджа
@@ -94,6 +95,7 @@ async function worker() {
       console.log(' location.reload');
     } else {
       console.error('Помилка надсилання даних', response.error);
+      alert(`Fetch error!`);
     }
   } else {
     location.reload();
@@ -108,21 +110,31 @@ function sleep(ms: number) {
 let isRunning: boolean = false;
 async function startWorker() {
   const domain = window.location.hostname;
+
   const storageData = await chrome.storage.local.get('domains');
   const domains = storageData.domains || {};
-  const scraperRunning = domains[domain]?.scraperRunning;
+  const {
+    scraperRunning,
+    pandingTime = 15000,
+    urlMacros,
+  } = domains[domain] || {};
 
-  console.log({ domain, storageData, scraperRunning });
+  console.log({ domain, storageData, data: domains[domain] });
 
   if (!scraperRunning || isRunning) return;
+
+  if (!pandingTime || !isValidUrl(urlMacros)) {
+    alert(`Bad data: pandingTime:${pandingTime}; urlMacros:${urlMacros} `);
+    return;
+  }
 
   isRunning = true;
   try {
     await sleep(pandingTime);
-    await worker();
+    await worker(urlMacros);
   } finally {
     isRunning = false;
-    // setTimeout(startWorker, pandingTime);
+    setTimeout(startWorker, pandingTime);
   }
 }
 

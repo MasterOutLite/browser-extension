@@ -1,6 +1,12 @@
+export interface IConfigData {
+  scraperRunning: boolean;
+  pandingTime: number;
+  urlMacros: string;
+}
+
 export async function setDomainConfig(
   domain: string,
-  data: Record<string, any>
+  data: Partial<IConfigData>
 ): Promise<void> {
   const storageData = await chrome.storage.local.get('domains');
   const domains = storageData.domains || {};
@@ -13,7 +19,7 @@ export async function setDomainConfig(
 
 export async function getDomainConfig(
   domain: string
-): Promise<Record<string, any>> {
+): Promise<Partial<IConfigData>> {
   const storageData = await chrome.storage.local.get('domains');
   const domains = storageData.domains || {};
 
