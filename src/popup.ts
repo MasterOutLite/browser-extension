@@ -6,12 +6,6 @@ document.getElementById('start-worker')?.addEventListener('click', async () => {
 
   if (!tab.url) return;
 
-  // Інжектуємо файл index.js
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id! },
-    files: ['src/content-scripts/index.js'],
-  });
-
   const domain = new URL(tab.url).hostname;
   const storageData = await chrome.storage.local.get('domains');
   const domains = storageData.domains || {};
