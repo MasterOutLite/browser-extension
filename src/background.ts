@@ -1,13 +1,14 @@
-import browser from 'webextension-polyfill';
+import browser, { Runtime } from 'webextension-polyfill';
 
 export enum EMessageType {
   REQUEST = 'REQUEST',
   NOTIFICATIONS = 'NOTIFICATIONS',
+  SET_CURRENT_TAB_ACTIVE = 'SET_CURRENT_TAB_ACTIVE',
 }
 
 async function sendRequest(
   message: any,
-  sender: any,
+  sender: Runtime.MessageSender,
   sendResponse: (...params: any) => void
 ) {
   console.log('Request: ', message, sender);
@@ -28,7 +29,7 @@ async function sendRequest(
 
 async function invokeNotifications(
   message: any,
-  sender: any,
+  sender: Runtime.MessageSender,
   sendResponse: (...params: any) => void
 ) {
   try {
@@ -53,6 +54,27 @@ async function invokeNotifications(
   }
 }
 
+async function setActiveTab(
+  message: any,
+  sender: Runtime.MessageSender,
+  sendResponse: (...params: any) => void
+) {
+  try {
+    if (sender.tab?.id && sender.tab?.windowId) {
+      const tabId = sender.tab.id;
+      const windowId = sender.tab.windowId;
+
+      chrome.tabs.update(tabId, { active: true }, () => {
+        chrome.windows.update(windowId, { focused: true });
+      });
+    }
+
+    sendResponse?.({ true: false });
+  } catch {
+    sendResponse?.({ success: false });
+  }
+}
+
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case EMessageType.REQUEST:
@@ -60,6 +82,9 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     case EMessageType.NOTIFICATIONS:
       invokeNotifications(message, sender, sendResponse);
+      break;
+    case EMessageType.SET_CURRENT_TAB_ACTIVE:
+      setActiveTab(message, sender, sendResponse);
       break;
   }
 

@@ -9,6 +9,7 @@ import {
   formatListToInit,
   isValidUrl,
   sendNotification,
+  sendSetActiveTab,
   sleep,
   StatusOperation,
 } from './utils';
@@ -117,6 +118,7 @@ async function startWorker() {
         message: `${domain}: Not found cards`,
         requireInteraction: true,
       });
+      await sendSetActiveTab();
       await sleep(2000);
       alert(`Cart not found!`);
     }
