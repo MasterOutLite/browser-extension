@@ -1,10 +1,5 @@
 import browser, { Runtime } from 'webextension-polyfill';
-
-export enum EMessageType {
-  REQUEST = 'REQUEST',
-  NOTIFICATIONS = 'NOTIFICATIONS',
-  SET_CURRENT_TAB_ACTIVE = 'SET_CURRENT_TAB_ACTIVE',
-}
+import { EMessageType } from './types';
 
 async function sendRequest(
   message: any,

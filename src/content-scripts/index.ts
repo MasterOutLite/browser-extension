@@ -1,5 +1,5 @@
-import { EMessageType } from '../background';
-import { IConfigData } from '../utils';
+import { EMessageType, IConfigData } from '../types';
+import { getDomainConfig, isValidUrl, sleep } from '../utils';
 import { damainOptions } from './constant';
 import { IStoredList } from './types';
 import { findContent } from './ui-selectors';
@@ -7,10 +7,8 @@ import {
   findNewCards,
   formatElementListToList,
   formatListToInit,
-  isValidUrl,
   sendNotification,
   sendSetActiveTab,
-  sleep,
   StatusOperation,
 } from './utils';
 
@@ -74,14 +72,11 @@ async function worker(
 let isRunning: boolean = false;
 async function startWorker() {
   const domain = window.location.hostname;
-
-  const storageData = await chrome.storage.local.get('domains');
-  const domains = storageData.domains || {};
   const {
     scraperRunning,
     pandingTime = 15000,
     urlMacros,
-  }: IConfigData = domains[domain] || {};
+  } = await getDomainConfig(domain);
 
   // console.log({ domain, storageData, data: domains[domain] });
 

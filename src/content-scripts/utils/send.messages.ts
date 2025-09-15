@@ -1,4 +1,4 @@
-import { EMessageType } from '../../background';
+import { EMessageType } from '../../types';
 
 export function sendNotification(params: {
   title: string;
