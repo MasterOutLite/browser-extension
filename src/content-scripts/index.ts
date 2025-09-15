@@ -1,72 +1,35 @@
-import { isValidUrl } from './utils';
+import { EMessageType } from '../background';
+import { IConfigData } from '../utils';
+import { damainOptions } from './constant';
+import { IList } from './types';
+import { findContent } from './ui-selectors';
+import {
+  isValidUrl,
+  sendNotification,
+  StatusOperation,
+  formatListToInit,
+  selectNewItemsByNameAndRef,
+  sleep,
+} from './utils';
 
-const cardSelector = '#mosaic-provider-jobcards > ul > li';
-const nameSelector = 'span[id^="jobTitle-"]';
-const refSelector = 'a[id^="job_"]';
-const keyReadedData = 'ReadedData';
+const config = damainOptions['pl.indeed.com'];
+const { keyReadedData } = config;
+
 // const urlMacros: string =
 //   'https://script.google.com/macros/s/AKfycbxSJaHMfgwdr2P5QGAIzTgFeA2BaQjApWR1AMKFceCLPjVBnRjTMBAjYaGGQEHtuXO5/exec';
 
-interface IReturnList {
-  name: string;
-  ref: string;
-}
+async function worker(
+  urlMacros: string = ''
+): Promise<{ status: StatusOperation; subStatus?: StatusOperation }> {
+  const { returnList: readedDates, returnListElement } = findContent(config);
 
-function readData(
-  cardSelector: string,
-  nameSelector: string,
-  refSelector: string
-) {
-  const returnList: IReturnList[] = [];
-
-  const cardListEl = document.querySelectorAll(cardSelector);
-
-  cardListEl.forEach((card) => {
-    const nameEl = card.querySelector(nameSelector);
-    const refEl = card.querySelector<HTMLAnchorElement>(refSelector);
-
-    const data: IReturnList = {
-      name: nameEl?.textContent?.trim() || '',
-      ref: refEl?.href || '',
-    };
-
-    if (Boolean(data.name) || Boolean(data.ref)) returnList.push(data);
-  });
-
-  return returnList;
-}
-
-function getNewItemsByNameAndRef(
-  readedDates: IReturnList[],
-  savedDate: IReturnList[]
-): IReturnList[] {
-  const formatKey = (v: IReturnList) => `${v.name}`;
-
-  const savedKeys = new Set(savedDate.map(formatKey));
-
-  return readedDates.filter((d) => !savedKeys.has(formatKey(d)));
-}
-
-function sendDataToTable(data: IReturnList[]): RequestInit {
-  const body = {
-    data,
-  };
-
-  return {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  };
-}
-
-async function worker(urlMacros: string = '') {
-  const readedDates = readData(cardSelector, nameSelector, refSelector);
+  if (Boolean(!readedDates?.length)) {
+    return { status: StatusOperation.NOT_FOUND_CARDS };
+  }
 
   // отримання даних із стореджа
   const savedDateString = localStorage.getItem(keyReadedData);
-  let savedDate: IReturnList[] = [];
+  let savedDate: IList[] = [];
 
   try {
     savedDate = savedDateString ? JSON.parse(savedDateString) : [];
@@ -74,7 +37,7 @@ async function worker(urlMacros: string = '') {
   } catch {}
 
   // пошук нових даних
-  const newData = getNewItemsByNameAndRef(readedDates, savedDate);
+  const newData = selectNewItemsByNameAndRef(readedDates, savedDate);
 
   // обєднання списку для майбутньої перевірки
   const combined = [...savedDate, ...readedDates];
@@ -83,28 +46,29 @@ async function worker(urlMacros: string = '') {
   );
 
   // Надсилаємо дані у background script
-  if (Boolean(newData.length)) {
+  const hasNewData = Boolean(newData.length);
+  if (hasNewData) {
     const response = await chrome.runtime.sendMessage({
       url: urlMacros,
-      init: sendDataToTable(newData) as RequestInit,
+      init: formatListToInit(newData),
+      type: EMessageType.REQUEST,
     });
 
     if (response?.success) {
       localStorage.setItem(keyReadedData, JSON.stringify(newDataForSave));
-      location.reload();
       console.log(' location.reload');
     } else {
       console.error('Помилка надсилання даних', response.error);
-      alert(`Fetch error!`);
+      return { status: StatusOperation.FETCH_SAVE_ERROR };
     }
   } else {
-    location.reload();
     console.log(' location.reload not find newData');
   }
-}
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return {
+    status: StatusOperation.OK,
+    subStatus: hasNewData ? StatusOperation.SEND_CARDS : StatusOperation.NONE,
+  };
 }
 
 let isRunning: boolean = false;
@@ -117,9 +81,9 @@ async function startWorker() {
     scraperRunning,
     pandingTime = 15000,
     urlMacros,
-  } = domains[domain] || {};
+  }: IConfigData = domains[domain] || {};
 
-  console.log({ domain, storageData, data: domains[domain] });
+  // console.log({ domain, storageData, data: domains[domain] });
 
   if (!scraperRunning || isRunning) return;
 
@@ -131,10 +95,33 @@ async function startWorker() {
   isRunning = true;
   try {
     await sleep(pandingTime);
-    await worker(urlMacros);
+    const res = await worker(urlMacros);
+
+    if (res.status === StatusOperation.OK) {
+      res.subStatus === StatusOperation.SEND_CARDS &&
+        (await sendNotification({
+          title: `Send new data: ${document.title}.`,
+          message: `${domain}: Saved new Cards.`,
+          requireInteraction: true,
+        }));
+
+      location.reload();
+    }
+    if ([StatusOperation.FETCH_SAVE_ERROR].includes(res.status)) {
+      setTimeout(startWorker, pandingTime);
+    }
+
+    if (res.status === StatusOperation.NOT_FOUND_CARDS) {
+      await sendNotification({
+        title: `ERROR: ${document.title}`,
+        message: `${domain}: Not found cards`,
+        requireInteraction: true,
+      });
+      await sleep(2000);
+      alert(`Cart not found!`);
+    }
   } finally {
     isRunning = false;
-    setTimeout(startWorker, pandingTime);
   }
 }
 
