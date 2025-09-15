@@ -1,15 +1,16 @@
 import { EMessageType } from '../background';
 import { IConfigData } from '../utils';
 import { damainOptions } from './constant';
-import { IList } from './types';
+import { IStoredList } from './types';
 import { findContent } from './ui-selectors';
 import {
+  findNewCards,
+  formatElementListToList,
+  formatListToInit,
   isValidUrl,
   sendNotification,
-  StatusOperation,
-  formatListToInit,
-  selectNewItemsByNameAndRef,
   sleep,
+  StatusOperation,
 } from './utils';
 
 const config = damainOptions['pl.indeed.com'];
@@ -21,41 +22,39 @@ const { keyReadedData } = config;
 async function worker(
   urlMacros: string = ''
 ): Promise<{ status: StatusOperation; subStatus?: StatusOperation }> {
-  const { returnList: readedDates, returnListElement } = findContent(config);
+  const { foundCards, foundCardsElement } = findContent(config);
 
-  if (Boolean(!readedDates?.length)) {
+  if (Boolean(!foundCards?.length)) {
     return { status: StatusOperation.NOT_FOUND_CARDS };
   }
 
   // отримання даних із стореджа
   const savedDateString = localStorage.getItem(keyReadedData);
-  let savedDate: IList[] = [];
+  let savedData: IStoredList[] = [];
 
   try {
-    savedDate = savedDateString ? JSON.parse(savedDateString) : [];
-    savedDate = Array.isArray(savedDate) ? savedDate : [];
+    savedData = savedDateString ? JSON.parse(savedDateString) : [];
+    savedData = Array.isArray(savedData) ? savedData : [];
+    if (!savedData[0]?.uniqueValue) localStorage.removeItem(keyReadedData);
   } catch {}
 
-  // пошук нових даних
-  const newData = selectNewItemsByNameAndRef(readedDates, savedDate);
-
-  // обєднання списку для майбутньої перевірки
-  const combined = [...savedDate, ...readedDates];
-  const newDataForSave = Array.from(
-    new Map(combined.map((item) => [item.name, item])).values()
+  const { newCards, newCardsForSave } = findNewCards(
+    savedData,
+    foundCardsElement,
+    config
   );
 
   // Надсилаємо дані у background script
-  const hasNewData = Boolean(newData.length);
+  const hasNewData = Boolean(newCards.length);
   if (hasNewData) {
     const response = await chrome.runtime.sendMessage({
       url: urlMacros,
-      init: formatListToInit(newData),
+      init: formatListToInit(formatElementListToList(newCards)),
       type: EMessageType.REQUEST,
     });
 
     if (response?.success) {
-      localStorage.setItem(keyReadedData, JSON.stringify(newDataForSave));
+      localStorage.setItem(keyReadedData, JSON.stringify(newCardsForSave));
       console.log(' location.reload');
     } else {
       console.error('Помилка надсилання даних', response.error);
@@ -106,6 +105,7 @@ async function startWorker() {
         }));
 
       location.reload();
+      return;
     }
     if ([StatusOperation.FETCH_SAVE_ERROR].includes(res.status)) {
       setTimeout(startWorker, pandingTime);
@@ -121,8 +121,8 @@ async function startWorker() {
       alert(`Cart not found!`);
     }
   } finally {
-    isRunning = false;
   }
+  isRunning = false;
 }
 
 document.addEventListener('start-job-scraper', async function () {

@@ -1,15 +1,13 @@
-export interface IList {
+export interface IApiList {
   name: string;
   ref: string;
 }
 
-export interface IStoredList {
-  name: string;
-  ref: string;
+export interface IStoredList extends IApiList {
   uniqueValue: string;
 }
 
-export interface IListElement {
+export interface IListElementBase {
   name: {
     value: string;
     el?: Element | null;
@@ -18,4 +16,8 @@ export interface IListElement {
     value: string;
     el?: Element | null;
   };
+}
+
+export interface IListElement extends IListElementBase {
+  uniqueValue: string;
 }

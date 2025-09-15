@@ -1,14 +1,11 @@
 import { IConfigSelector } from '../constant';
-import { IList, IListElement } from '../types';
+import { IApiList, IListElement, IListElementBase } from '../types';
+import { extractUniqueValue } from '../utils';
 
-export function findContent({
-  cardSelector,
-  nameSelector,
-  refSelector,
-  externalId,
-}: IConfigSelector) {
-  const returnList: IList[] = [];
-  const returnListElement: IListElement[] = [];
+export function findContent(config: IConfigSelector) {
+  const { cardSelector, nameSelector, refSelector } = config;
+  const foundCards: IApiList[] = [];
+  const foundCardsElement: IListElement[] = [];
 
   const cardListEl = document.querySelectorAll(cardSelector);
 
@@ -16,7 +13,7 @@ export function findContent({
     const nameEl = card.querySelector(nameSelector);
     const refEl = card.querySelector<HTMLAnchorElement>(refSelector);
 
-    const data: IListElement = {
+    const baseData: IListElementBase = {
       name: {
         el: nameEl,
         value: nameEl?.textContent?.trim() || '',
@@ -27,11 +24,22 @@ export function findContent({
       },
     };
 
+    const { uniqueValue, isDefault } = extractUniqueValue(baseData, config);
+
+    const data = {
+      ...baseData,
+      uniqueValue,
+    };
+
+    if (isDefault && config.externalId?.fromLink) {
+      return;
+    }
+
     if (Boolean(data.name.value) || Boolean(data.ref.value)) {
-      returnListElement.push(data);
-      returnList.push({ name: data.name.value, ref: data.ref.value });
+      foundCardsElement.push(data);
+      foundCards.push({ name: data.name.value, ref: data.ref.value });
     }
   });
 
-  return { returnList, returnListElement };
+  return { foundCards, foundCardsElement };
 }
