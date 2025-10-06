@@ -1,4 +1,4 @@
-import { IConfigSelector } from '../constant';
+import { IConfigSelector } from 'types/index';
 import { IApiList, IListElement, IListElementBase } from '../types';
 import { extractUniqueValue } from '../utils';
 

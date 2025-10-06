@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import webExtension, { readJsonFile } from 'vite-plugin-web-extension';
+import path from 'path';
 
 function generateManifest() {
   const manifest = readJsonFile('src/manifest.json');
@@ -22,4 +23,10 @@ export default defineConfig({
     }),
     react(),
   ],
+  resolve: {
+    alias: {
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@types': path.resolve(__dirname, 'src/types'),
+    },
+  },
 });

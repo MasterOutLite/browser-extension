@@ -1,6 +1,6 @@
 import { EMessageType } from '../types';
-import { getDomainConfig, isValidUrl, sleep } from '../utils';
-import { damainOptions } from './constant';
+import { domainOptions, getDomainConfig, isValidUrl, sleep } from '../utils';
+
 import { IStoredList } from './types';
 import { findContent } from './ui-selectors';
 import {
@@ -12,11 +12,8 @@ import {
   StatusOperation,
 } from './utils';
 
-const config = damainOptions['pl.indeed.com'];
+const config = domainOptions['pl.indeed.com'];
 const { keyReadedData } = config;
-
-// const urlMacros: string =
-//   'https://script.google.com/macros/s/AKfycbxSJaHMfgwdr2P5QGAIzTgFeA2BaQjApWR1AMKFceCLPjVBnRjTMBAjYaGGQEHtuXO5/exec';
 
 async function worker(
   urlMacros: string = ''
@@ -34,7 +31,10 @@ async function worker(
   try {
     savedData = savedDateString ? JSON.parse(savedDateString) : [];
     savedData = Array.isArray(savedData) ? savedData : [];
-    if (!savedData[0]?.uniqueValue) localStorage.removeItem(keyReadedData);
+    if (!savedData[0]?.uniqueValue) {
+      localStorage.removeItem(keyReadedData);
+      savedData = [];
+    }
   } catch {}
 
   const { newCards, newCardsForSave } = findNewCards(
@@ -71,11 +71,9 @@ async function worker(
 
 async function startWorker() {
   const domain = window.location.hostname;
-  const {
-    scraperRunning,
-    pandingTime = 15000,
-    urlMacros,
-  } = await getDomainConfig(domain);
+  const { scraperRunning, pandingTime = 15000 } = await getDomainConfig(domain);
+
+  const urlMacros = '';
 
   // console.log({ domain, storageData, data: domains[domain] });
 

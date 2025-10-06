@@ -1,12 +1,14 @@
-import { Button, Input, Stack, TextField } from '@mui/material';
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { IConfigData } from '../../../types';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { Button, IconButton, Stack, TextField } from '@mui/material';
 import {
   getCurrentTab,
   getDomainConfig,
   setDomainConfig,
-} from '../../../utils';
+  setStorageValue,
+} from '@utils/index';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { IConfigData } from '../../../types';
 
 export interface IFormSettingsProps {}
 
@@ -14,7 +16,6 @@ export function FormSettings({}: IFormSettingsProps) {
   const { register, handleSubmit, reset } = useForm<IConfigData>({
     defaultValues: {
       pandingTime: 15,
-      urlMacros: '',
     },
   });
 
@@ -28,9 +29,15 @@ export function FormSettings({}: IFormSettingsProps) {
     if (!tab.url) return;
     const domain = new URL(tab.url).hostname;
 
-    console.log({ data, domain });
-
     await setDomainConfig(domain, data);
+  };
+
+  const handleRemoveAllState = async () => {
+    const tab = await getCurrentTab();
+
+    if (!tab.url) return;
+    const domain = new URL(tab.url).hostname;
+    setStorageValue(domain, {}, { clear: true });
   };
 
   async function getDate() {
@@ -41,8 +48,6 @@ export function FormSettings({}: IFormSettingsProps) {
     const domain = new URL(tab.url).hostname;
     const config = await getDomainConfig(domain);
 
-    console.log({ config, domain });
-
     reset(config);
   }
 
@@ -52,7 +57,6 @@ export function FormSettings({}: IFormSettingsProps) {
 
   return (
     <Stack component='form' gap='6px' onSubmit={handleSubmit(handleSubmitForm)}>
-      {/* // Change to global */}
       <TextField
         variant='standard'
         type='text'
@@ -66,9 +70,14 @@ export function FormSettings({}: IFormSettingsProps) {
         {...register('pandingTime', { valueAsNumber: true })}
       />
 
-      <Button variant='contained' type='submit'>
-        Save
-      </Button>
+      <Stack direction='row' gap={1}>
+        <Button variant='contained' type='submit' fullWidth>
+          Save
+        </Button>
+        <IconButton onClick={handleRemoveAllState}>
+          <DeleteForeverIcon />
+        </IconButton>
+      </Stack>
     </Stack>
   );
 }

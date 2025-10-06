@@ -1,13 +1,11 @@
 import { Button, Stack } from '@mui/material';
+import { setDomainConfig } from '@utils/storage';
+import { getCurrentTab } from '@utils/tabs';
 import browser from 'webextension-polyfill';
-import { setDomainConfig } from '../../../utils';
 
 export function Action() {
   const handleStartWorker = async () => {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
+    const tab = await getCurrentTab();
 
     if (!tab.url) return;
 
@@ -25,7 +23,6 @@ export function Action() {
     }
 
     const domain = new URL(tab.url).hostname;
-
     await setDomainConfig(domain, { scraperRunning: true });
 
     browser.scripting.executeScript({
@@ -39,11 +36,7 @@ export function Action() {
   };
 
   const handlStopWorker = async () => {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-
+    const tab = await getCurrentTab();
     if (!tab.url) return;
 
     const domain = new URL(tab.url).hostname;
