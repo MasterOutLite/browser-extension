@@ -1,4 +1,4 @@
-import { setDomainConfig } from './utils';
+import { setDomainConfig } from '../utils';
 
 document.getElementById('start-worker')?.addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({

@@ -10,7 +10,7 @@ export interface IConfigSelector {
 
 export const damainOptions: Record<string, IConfigSelector> = {
   'pl.indeed.com': {
-    cardSelector: '#mosaic-provider-jobcards > ul > li',
+    cardSelector: 'ul > li',
     nameSelector: 'span[id^="jobTitle-"]',
     refSelector: 'a[id^="job_"]',
     keyReadedData: 'ReadedData',
