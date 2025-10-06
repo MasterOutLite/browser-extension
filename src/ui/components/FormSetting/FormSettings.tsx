@@ -11,7 +11,12 @@ import {
 export interface IFormSettingsProps {}
 
 export function FormSettings({}: IFormSettingsProps) {
-  const { register, handleSubmit, reset } = useForm<IConfigData>({});
+  const { register, handleSubmit, reset } = useForm<IConfigData>({
+    defaultValues: {
+      pandingTime: 15,
+      urlMacros: '',
+    },
+  });
 
   const handleSubmitForm = async (
     data: IConfigData,

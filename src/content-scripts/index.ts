@@ -1,4 +1,4 @@
-import { EMessageType, IConfigData } from '../types';
+import { EMessageType } from '../types';
 import { getDomainConfig, isValidUrl, sleep } from '../utils';
 import { damainOptions } from './constant';
 import { IStoredList } from './types';
@@ -80,13 +80,16 @@ async function startWorker() {
   // console.log({ domain, storageData, data: domains[domain] });
 
   if (!scraperRunning || (window as any).isRunning) return;
+  (window as any).isRunning = true;
 
   if (!pandingTime || !isValidUrl(urlMacros)) {
+    console.log('Call alert');
+
     alert(`Bad data: pandingTime:${pandingTime}; urlMacros:${urlMacros} `);
+    (window as any).isRunning = false;
     return;
   }
 
-  (window as any).isRunning = true;
   try {
     await sleep(pandingTime);
     const res = await worker(urlMacros);
@@ -119,6 +122,11 @@ async function startWorker() {
   } finally {
   }
   (window as any).isRunning = false;
+}
+
+if (!(window as any).__scraperInjected) {
+  (window as any).__scraperInjected = true;
+  console.log('Script no located');
 }
 
 document.addEventListener('start-job-scraper', async function () {
