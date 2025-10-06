@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import webExtension, { readJsonFile } from 'vite-plugin-web-extension';
 
 function generateManifest() {
@@ -19,5 +20,6 @@ export default defineConfig({
       manifest: generateManifest,
       watchFilePaths: ['package.json', 'manifest.json'],
     }),
+    react(),
   ],
 });

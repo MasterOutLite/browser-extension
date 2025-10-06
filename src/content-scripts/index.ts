@@ -69,7 +69,6 @@ async function worker(
   };
 }
 
-let isRunning: boolean = false;
 async function startWorker() {
   const domain = window.location.hostname;
   const {
@@ -80,14 +79,14 @@ async function startWorker() {
 
   // console.log({ domain, storageData, data: domains[domain] });
 
-  if (!scraperRunning || isRunning) return;
+  if (!scraperRunning || (window as any).isRunning) return;
 
   if (!pandingTime || !isValidUrl(urlMacros)) {
     alert(`Bad data: pandingTime:${pandingTime}; urlMacros:${urlMacros} `);
     return;
   }
 
-  isRunning = true;
+  (window as any).isRunning = true;
   try {
     await sleep(pandingTime);
     const res = await worker(urlMacros);
@@ -119,7 +118,7 @@ async function startWorker() {
     }
   } finally {
   }
-  isRunning = false;
+  (window as any).isRunning = false;
 }
 
 document.addEventListener('start-job-scraper', async function () {

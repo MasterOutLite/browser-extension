@@ -5,42 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./styles.css" />
-    <script type="module" src="./popup.ts"></script>
-    <script type="module" src="./ui/form.config.ts"></script>
     <title>Popup</title>
   </head>
   <body>
+    <div id="root"></div>
     <section class="container">
-      <h3>Job Scraper</h3>
-
-      <form id="config-form" class="form-container pt-10">
-        <section class="flex flex-column">
-          <label class="field-label"> Panding time </label>
-          <input
-            class="regular-field"
-            name="pandingTime"
-            type="number"
-            placeholder="milisecond"
-          />
-        </section>
-
-        <section class="flex flex-column">
-          <label class="field-label"> Url macros </label>
-          <input
-            class="regular-field"
-            name="urlMacros"
-            type="text"
-            placeholder="Url macros"
-          />
-        </section>
-        <button type="submit" class="regular-btn">Save</button>
-      </form>
-
       <div class="button-group pt-10">
         <button id="start-worker" class="regular-btn">Start</button>
         <button id="stop-worker" class="regular-btn">Stop</button>
         <button id="close-window" class="regular-btn">Close</button>
       </div>
     </section>
+
+    <script type="module" src="./popup.ts"></script>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
