@@ -1,21 +1,44 @@
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { Button, IconButton, Stack, TextField } from '@mui/material';
-import { clearStorage } from '@utils/storage';
+import {
+  clearStorage,
+  getCurrentTab,
+  getStorageValue,
+  getStorageValueByKey,
+  setStorageValue,
+} from '@utils/index';
+import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IGlobalState } from 'types/config.data';
 
 export function GlobalSettings() {
-  const { register, handleSubmit } = useForm<IGlobalState>({
+  const { register, handleSubmit, reset } = useForm<IGlobalState>({
     defaultValues: {
-      pandingTime: 15,
+      urlMacros: '',
     },
   });
 
-  const handleSubmitForm: SubmitHandler<IGlobalState> = () => {};
+  const handleSubmitForm: SubmitHandler<IGlobalState> = async (data, e) => {
+    e?.preventDefault();
+
+    await setStorageValue(data);
+
+    console.log('Saved Global', data);
+  };
 
   const handleRemoveAllState = async () => {
     clearStorage();
   };
+
+  async function getDate() {
+    const urlMacros = await getStorageValue<string>('urlMacros');
+
+    reset(urlMacros);
+  }
+
+  useEffect(() => {
+    getDate();
+  }, []);
 
   return (
     <Stack component='form' gap='6px' onSubmit={handleSubmit(handleSubmitForm)}>

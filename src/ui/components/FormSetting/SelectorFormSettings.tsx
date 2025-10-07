@@ -1,5 +1,9 @@
 import { Button, Stack, TextField } from '@mui/material';
-import { getCurrentTab, getDomainConfig, setStorageValue } from '@utils/index';
+import {
+  getCurrentTab,
+  getDomainConfig,
+  setStorageValueByKey,
+} from '@utils/index';
 import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IConfigSelector } from 'types/index';
@@ -19,7 +23,7 @@ export function SelectorFormSettings() {
     if (!tab.url) return;
     const domain = new URL(tab.url).hostname;
 
-    setStorageValue(domain, { selectors });
+    setStorageValueByKey(domain, { selectors });
   };
 
   async function getDate() {

@@ -1,9 +1,10 @@
-import { EMessageType } from '../types';
+import { EMessageType, IGlobalState } from '../types';
 import {
   domainOptions,
   ELocalStorageKey,
   getDomainConfig,
   getDomainOptions,
+  getStorageValueByKey,
   isValidUrl,
   sleep,
 } from '../utils';
@@ -12,7 +13,7 @@ import { IStoredList } from './types';
 import { findContent } from './ui-selectors';
 import {
   findNewCards,
-  formatElementListToList,
+  formatElementListToApiList,
   formatListToInit,
   sendNotification,
   sendSetActiveTab,
@@ -30,6 +31,17 @@ async function worker(
   const domain = getDomain();
   const { selectors } = await getDomainConfig(domain);
   const config = getDomainOptions(domain, selectors || {});
+  const { cardSelector, companySelector, nameSelector, refSelector } = config;
+
+  if (
+    ![cardSelector, companySelector, nameSelector, refSelector].find(
+      (v) => !Boolean(v)
+    )
+  ) {
+    console.error('Config selectors is bad: ', config);
+    return { status: StatusOperation.CONFIG_SELECTOR_ERROR };
+  }
+
   const { foundCards, foundCardsElement } = findContent(config);
 
   if (Boolean(!foundCards?.length)) {
@@ -60,7 +72,7 @@ async function worker(
   if (hasNewData) {
     const response = await chrome.runtime.sendMessage({
       url: urlMacros,
-      init: formatListToInit(formatElementListToList(newCards)),
+      init: formatListToInit(formatElementListToApiList(newCards)),
       type: EMessageType.REQUEST,
     });
 
@@ -83,11 +95,17 @@ async function worker(
 
 async function startWorker() {
   const domain = getDomain();
-  const { scraperRunning, pandingTime = 15000 } = await getDomainConfig(domain);
+  const {
+    scraperRunning,
+    pandingTime = 15,
+    urlMacros: domainUrlMacros,
+  } = await getDomainConfig(domain);
+  const globalUrlMacros = await getStorageValueByKey<string>('urlMacros');
+  const normalizeTime = pandingTime * 1000;
 
-  const urlMacros = '';
+  const urlMacros = domainUrlMacros || globalUrlMacros;
 
-  // console.log({ domain, storageData, data: domains[domain] });
+  console.log({ domain, domainUrlMacros, globalUrlMacros, urlMacros });
 
   if (!scraperRunning || (window as any).isRunning) return;
   (window as any).isRunning = true;
@@ -95,13 +113,15 @@ async function startWorker() {
   if (!pandingTime || !isValidUrl(urlMacros)) {
     console.log('Call alert');
 
-    alert(`Bad data: pandingTime:${pandingTime}; urlMacros:${urlMacros} `);
+    alert(
+      `Bad data: pandingTime:${pandingTime}| ${normalizeTime}; urlMacros:${urlMacros} `
+    );
     (window as any).isRunning = false;
     return;
   }
 
   try {
-    await sleep(pandingTime);
+    await sleep(normalizeTime);
     const res = await worker(urlMacros);
 
     if (res.status === StatusOperation.OK) {
@@ -116,7 +136,7 @@ async function startWorker() {
       return;
     }
     if ([StatusOperation.FETCH_SAVE_ERROR].includes(res.status)) {
-      setTimeout(startWorker, pandingTime);
+      setTimeout(startWorker, normalizeTime);
     }
 
     if (res.status === StatusOperation.NOT_FOUND_CARDS) {

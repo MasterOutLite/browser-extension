@@ -1,6 +1,8 @@
 export interface IApiList {
   name: string;
   ref: string;
+  companyName: string;
+  date?: string;
 }
 
 export interface IStoredList extends IApiList {

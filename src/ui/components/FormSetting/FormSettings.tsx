@@ -4,7 +4,7 @@ import {
   getCurrentTab,
   getDomainConfig,
   setDomainConfig,
-  setStorageValue,
+  setStorageValueByKey,
 } from '@utils/index';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -37,7 +37,7 @@ export function FormSettings({}: IFormSettingsProps) {
 
     if (!tab.url) return;
     const domain = new URL(tab.url).hostname;
-    setStorageValue(domain, {}, { clear: true });
+    setStorageValueByKey(domain, {}, { clear: true });
   };
 
   async function getDate() {

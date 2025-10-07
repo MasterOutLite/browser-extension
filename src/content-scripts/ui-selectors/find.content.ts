@@ -1,6 +1,6 @@
 import { IConfigSelector } from 'types/index';
 import { IApiList, IListElement, IListElementBase } from '../types';
-import { extractUniqueValue } from '../utils';
+import { extractUniqueValue, formatElementToApi } from '../utils';
 
 export function findContent(config: IConfigSelector) {
   const {
@@ -56,7 +56,7 @@ export function findContent(config: IConfigSelector) {
 
     if (Boolean(data.name.value) || Boolean(data.ref.value)) {
       foundCardsElement.push(data);
-      foundCards.push({ name: data.name.value, ref: data.ref.value });
+      foundCards.push(formatElementToApi(data));
     }
   });
 
