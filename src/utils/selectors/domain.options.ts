@@ -6,8 +6,10 @@ export const domainOptions: Record<string, IConfigSelector> = {
     nameSelector: 'span[id^="jobTitle-"]',
     refSelector: 'a[id^="job_"]',
     dateSelector: '',
-    keyReadedData: 'ReadedData',
-    externalId: { fromLink: true },
+    externalId: {
+      fromLink: true,
+      urlQueryParams: ['jk'],
+    },
   },
 };
 

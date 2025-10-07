@@ -1,4 +1,4 @@
-import { IConfigData } from '../types';
+import { IConfigData } from '../../types';
 import browser from 'webextension-polyfill';
 
 export interface IStorageValue {

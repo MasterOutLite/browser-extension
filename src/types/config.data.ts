@@ -16,8 +16,21 @@ export interface IConfigSelector {
   nameSelector: string;
   refSelector: string;
   dateSelector?: string;
-  keyReadedData: string;
-  externalId?: {
-    fromLink?: boolean;
-  };
+  companySelector?: string;
+  externalId?: IExternalID;
+  selectors?: ISelector[];
+}
+
+export interface ISelector {
+  keySelectorHtml: string;
+  keyRelationToApi: string;
+  order: number;
+  isRequired?: boolean;
+  hasCheckForUnique?: boolean;
+}
+
+export interface IExternalID {
+  fromLink?: boolean;
+  urlPathName?: boolean;
+  urlQueryParams?: string[];
 }

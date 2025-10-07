@@ -1,5 +1,11 @@
 import { EMessageType } from '../types';
-import { domainOptions, getDomainConfig, isValidUrl, sleep } from '../utils';
+import {
+  domainOptions,
+  ELocalStorageKey,
+  getDomainConfig,
+  isValidUrl,
+  sleep,
+} from '../utils';
 
 import { IStoredList } from './types';
 import { findContent } from './ui-selectors';
@@ -13,7 +19,7 @@ import {
 } from './utils';
 
 const config = domainOptions['pl.indeed.com'];
-const { keyReadedData } = config;
+const keyReadedData = ELocalStorageKey.SavedCard;
 
 async function worker(
   urlMacros: string = ''
