@@ -18,7 +18,7 @@ export interface IConfigSelector {
   dateSelector?: string;
   companySelector?: string;
   externalId?: IExternalID;
-  selectors?: ISelector[];
+  selectorsOptions?: ISelector[];
 }
 
 export interface ISelector {

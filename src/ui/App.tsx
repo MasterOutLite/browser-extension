@@ -1,12 +1,14 @@
-import { useState } from 'react';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import HomeIcon from '@mui/icons-material/Home';
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PublicIcon from '@mui/icons-material/Public';
-import HomeIcon from '@mui/icons-material/Home';
 import { Icon, IconButton, Stack, Typography } from '@mui/material';
+import { useState } from 'react';
 import {
   Action,
+  CustomSelectorsFormSettings,
   FormSettings,
   GlobalSettings,
   SelectorFormSettings,
@@ -16,6 +18,7 @@ export enum ETabs {
   Main = 'main',
   PageSettings = 'pageSettings',
   GlobalSettings = 'globalSettings',
+  CustomSelectorsSettings = 'customSelectorsSettings',
 }
 
 export interface ILocalRoute {
@@ -27,7 +30,15 @@ const localRoutes: ILocalRoute[] = [
   { value: ETabs.Main, icon: <HomeIcon /> },
   { value: ETabs.PageSettings, icon: <NewspaperIcon /> },
   { value: ETabs.GlobalSettings, icon: <PublicIcon /> },
+  { value: ETabs.CustomSelectorsSettings, icon: <AutoFixHighIcon /> },
 ];
+
+const tabsRender: Record<ETabs, () => React.ReactNode> = {
+  [ETabs.Main]: () => <FormSettings />,
+  [ETabs.PageSettings]: () => <SelectorFormSettings />,
+  [ETabs.GlobalSettings]: () => <GlobalSettings />,
+  [ETabs.CustomSelectorsSettings]: () => <CustomSelectorsFormSettings />,
+};
 
 const initRoute = localRoutes.find((v) => v.value === ETabs.Main)!;
 
@@ -68,10 +79,7 @@ export function App() {
         </IconButton>
       </Stack>
 
-      {tab.value === ETabs.Main && <FormSettings />}
-      {tab.value === ETabs.PageSettings && <SelectorFormSettings />}
-      {tab.value === ETabs.GlobalSettings && <GlobalSettings />}
-
+      {tabsRender[tab.value]?.()}
       <Action />
     </Stack>
   );
