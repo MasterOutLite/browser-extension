@@ -20,6 +20,7 @@ export function getDomainOptions(
         nameSelector: '',
         refSelector: '',
         dateSelector: '',
+        companySelector: '',
         externalId: { fromLink: false },
       };
 

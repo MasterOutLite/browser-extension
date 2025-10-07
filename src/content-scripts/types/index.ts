@@ -16,6 +16,14 @@ export interface IListElementBase {
     value: string;
     el?: Element | null;
   };
+  companyName: {
+    value: string;
+    el?: Element | null;
+  };
+  date?: {
+    value: string;
+    el?: Element | null;
+  };
 }
 
 export interface IListElement extends IListElementBase {

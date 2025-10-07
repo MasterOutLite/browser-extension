@@ -3,7 +3,13 @@ import { IApiList, IListElement, IListElementBase } from '../types';
 import { extractUniqueValue } from '../utils';
 
 export function findContent(config: IConfigSelector) {
-  const { cardSelector, nameSelector, refSelector } = config;
+  const {
+    cardSelector,
+    nameSelector,
+    refSelector,
+    companySelector,
+    dateSelector,
+  } = config;
   const foundCards: IApiList[] = [];
   const foundCardsElement: IListElement[] = [];
 
@@ -12,6 +18,8 @@ export function findContent(config: IConfigSelector) {
   cardListEl.forEach((card) => {
     const nameEl = card.querySelector(nameSelector);
     const refEl = card.querySelector<HTMLAnchorElement>(refSelector);
+    const companyEl = card.querySelector(companySelector);
+    const dateEl = dateSelector ? card.querySelector(dateSelector) : null;
 
     const baseData: IListElementBase = {
       name: {
@@ -22,7 +30,18 @@ export function findContent(config: IConfigSelector) {
         value: refEl?.href || '',
         el: refEl,
       },
+      companyName: {
+        value: companyEl?.textContent?.trim() || '',
+        el: companyEl,
+      },
     };
+
+    if (dateEl) {
+      baseData.date = {
+        value: dateEl?.textContent?.trim() || '',
+        el: dateEl,
+      };
+    }
 
     const { uniqueValue, isDefault } = extractUniqueValue(baseData, config);
 

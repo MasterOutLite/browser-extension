@@ -5,6 +5,7 @@ export const domainOptions: Record<string, IConfigSelector> = {
     cardSelector: 'ul > li',
     nameSelector: 'span[id^="jobTitle-"]',
     refSelector: 'a[id^="job_"]',
+    companySelector: '',
     dateSelector: '',
     externalId: {
       fromLink: true,

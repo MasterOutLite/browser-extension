@@ -3,6 +3,7 @@ import {
   domainOptions,
   ELocalStorageKey,
   getDomainConfig,
+  getDomainOptions,
   isValidUrl,
   sleep,
 } from '../utils';
@@ -18,12 +19,17 @@ import {
   StatusOperation,
 } from './utils';
 
-const config = domainOptions['pl.indeed.com'];
+// const config = domainOptions['pl.indeed.com'];
 const keyReadedData = ELocalStorageKey.SavedCard;
+
+const getDomain = () => window.location.hostname;
 
 async function worker(
   urlMacros: string = ''
 ): Promise<{ status: StatusOperation; subStatus?: StatusOperation }> {
+  const domain = getDomain();
+  const { selectors } = await getDomainConfig(domain);
+  const config = getDomainOptions(domain, selectors || {});
   const { foundCards, foundCardsElement } = findContent(config);
 
   if (Boolean(!foundCards?.length)) {
@@ -76,7 +82,7 @@ async function worker(
 }
 
 async function startWorker() {
-  const domain = window.location.hostname;
+  const domain = getDomain();
   const { scraperRunning, pandingTime = 15000 } = await getDomainConfig(domain);
 
   const urlMacros = '';

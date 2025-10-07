@@ -15,8 +15,8 @@ export interface IConfigSelector {
   cardSelector: string;
   nameSelector: string;
   refSelector: string;
+  companySelector: string;
   dateSelector?: string;
-  companySelector?: string;
   externalId?: IExternalID;
   selectorsOptions?: ISelector[];
 }
