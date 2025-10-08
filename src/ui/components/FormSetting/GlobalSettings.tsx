@@ -45,7 +45,7 @@ export function GlobalSettings() {
       <TextField
         variant='standard'
         type='text'
-        placeholder='Url macros'
+        label='Url macros'
         {...register('urlMacros')}
       />
 

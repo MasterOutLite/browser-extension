@@ -1,9 +1,7 @@
-import { EMessageType, IGlobalState } from '../types';
+import { EMessageType, IConfigSelector } from '../types';
 import {
-  domainOptions,
   ELocalStorageKey,
   getDomainConfig,
-  getDomainOptions,
   getStorageValueByKey,
   isValidUrl,
   sleep,
@@ -29,16 +27,20 @@ async function worker(
   urlMacros: string = ''
 ): Promise<{ status: StatusOperation; subStatus?: StatusOperation }> {
   const domain = getDomain();
-  const { selectors } = await getDomainConfig(domain);
-  const config = getDomainOptions(domain, selectors || {});
+  const { selectors, scraperRunning } = await getDomainConfig(domain);
+  if (!scraperRunning) return { status: StatusOperation.NONE };
+  const config: IConfigSelector = selectors || ({} as IConfigSelector);
   const { cardSelector, companySelector, nameSelector, refSelector } = config;
 
-  if (
-    ![cardSelector, companySelector, nameSelector, refSelector].find(
-      (v) => !Boolean(v)
-    )
-  ) {
-    console.error('Config selectors is bad: ', config);
+  const checkSelectors = [
+    cardSelector,
+    companySelector,
+    nameSelector,
+    refSelector,
+  ];
+
+  if (!checkSelectors.every((v) => Boolean(v))) {
+    console.log('Config selectors is bad: ', checkSelectors);
     return { status: StatusOperation.CONFIG_SELECTOR_ERROR };
   }
 
@@ -105,14 +107,10 @@ async function startWorker() {
 
   const urlMacros = domainUrlMacros || globalUrlMacros;
 
-  console.log({ domain, domainUrlMacros, globalUrlMacros, urlMacros });
-
   if (!scraperRunning || (window as any).isRunning) return;
   (window as any).isRunning = true;
 
   if (!pandingTime || !isValidUrl(urlMacros)) {
-    console.log('Call alert');
-
     alert(
       `Bad data: pandingTime:${pandingTime}| ${normalizeTime}; urlMacros:${urlMacros} `
     );
@@ -123,6 +121,7 @@ async function startWorker() {
   try {
     await sleep(normalizeTime);
     const res = await worker(urlMacros);
+    console.log('Result worker: ', res);
 
     if (res.status === StatusOperation.OK) {
       res.subStatus === StatusOperation.SEND_CARDS &&

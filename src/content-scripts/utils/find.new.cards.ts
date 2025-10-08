@@ -8,7 +8,8 @@ export function findNewCards(
   config: IConfigSelector
 ) {
   const newCards = currentList.filter((cur) => {
-    const { uniqueValue } = extractUniqueValue(cur, config);
+    const { uniqueValue, isDefault } = extractUniqueValue(cur, config);
+    console.log('Check extractUniqueValue:', { uniqueValue, isDefault });
 
     const foundItem = savedList.find(
       (v) => (v.uniqueValue || v.name) === uniqueValue

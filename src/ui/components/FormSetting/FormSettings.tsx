@@ -60,13 +60,13 @@ export function FormSettings({}: IFormSettingsProps) {
       <TextField
         variant='standard'
         type='text'
-        placeholder='Url macros'
+        label='Url macros'
         {...register('urlMacros')}
       />
 
       <TextField
         variant='standard'
-        placeholder='Seconds'
+        label='Seconds'
         {...register('pandingTime', { valueAsNumber: true })}
       />
 

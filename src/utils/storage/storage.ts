@@ -33,7 +33,7 @@ export async function setStorageValueByKey<T extends Record<string, any>>(
 ): Promise<void> {
   const newValues = clear
     ? data
-    : { ...data, ...(await getStorageValueByKey<T>(key)) };
+    : { ...(await getStorageValueByKey<T>(key)), ...data };
 
   return await setStorageValue({
     [key]: newValues,

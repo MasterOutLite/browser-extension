@@ -1,6 +1,6 @@
 #### Test macros
 
-https://script.google.com/macros/s/AKfycbw7y3RZ7DS1rdZPie8qlT-7ugK0y9FGNYk8IMzuboFYZYsp-lQ6utOMMIJYje_L-Eb-/exec
+https://script.google.com/macros/s/AKfycbxffjjttcceGT67kHJO9ahoYyHKx1DKhEDmKVT2yJfTtVXYQ9pqfcD5cBWE4A8omgZB/exec
 
 ### Example vacancy
 

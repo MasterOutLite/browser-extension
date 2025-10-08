@@ -21,6 +21,8 @@ export function findContent(config: IConfigSelector) {
     const companyEl = card.querySelector(companySelector);
     const dateEl = dateSelector ? card.querySelector(dateSelector) : null;
 
+    if ([nameEl, refEl, companyEl].some((v) => !Boolean(v))) return;
+
     const baseData: IListElementBase = {
       name: {
         el: nameEl,
@@ -44,6 +46,8 @@ export function findContent(config: IConfigSelector) {
     }
 
     const { uniqueValue, isDefault } = extractUniqueValue(baseData, config);
+
+    console.log('Check extractUniqueValue:', { uniqueValue, isDefault });
 
     const data = {
       ...baseData,

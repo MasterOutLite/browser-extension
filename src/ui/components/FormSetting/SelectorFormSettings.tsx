@@ -1,15 +1,23 @@
-import { Button, Stack, TextField } from '@mui/material';
+import {
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import {
   getCurrentTab,
   getDomainConfig,
+  getDomainOptions,
   setStorageValueByKey,
 } from '@utils/index';
 import { useEffect } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { IConfigSelector } from 'types/index';
 
 export function SelectorFormSettings() {
-  const { register, handleSubmit, reset } = useForm<IConfigSelector>({
+  const { register, handleSubmit, reset, control } = useForm<IConfigSelector>({
     defaultValues: {},
   });
 
@@ -32,9 +40,11 @@ export function SelectorFormSettings() {
     if (!tab.url) return;
 
     const domain = new URL(tab.url).hostname;
-    const config = await getDomainConfig(domain);
 
-    reset(config.selectors);
+    const config = await getDomainConfig(domain);
+    const selectors = getDomainOptions(domain, config.selectors || {});
+
+    reset(selectors);
   }
 
   useEffect(() => {
@@ -45,21 +55,68 @@ export function SelectorFormSettings() {
     <Stack component='form' gap='6px' onSubmit={handleSubmit(handleSubmitForm)}>
       <TextField
         variant='standard'
-        placeholder='Card Selector'
+        label='Card Selector'
         {...register('cardSelector')}
       />
 
       <TextField
         variant='standard'
-        placeholder='Name Selector'
+        label='Name Selector'
         {...register('nameSelector')}
       />
 
       <TextField
         variant='standard'
-        placeholder='Ref Selector'
+        label='Company Selector'
+        {...register('companySelector')}
+      />
+
+      <TextField
+        variant='standard'
+        label='Ref Selector'
         {...register('refSelector')}
       />
+
+      <TextField
+        variant='standard'
+        label='Date Selector'
+        {...register('dateSelector')}
+      />
+
+      <Stack>
+        <Typography variant='subtitle1'>External Id</Typography>
+        <Controller
+          name='externalId.fromLink'
+          control={control}
+          defaultValue={false}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox {...field} checked={field.value} />}
+              labelPlacement='end'
+              label='From link'
+            />
+          )}
+        />
+
+        <Controller
+          name='externalId.urlPathName'
+          control={control}
+          defaultValue={false}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox {...field} checked={field.value} />}
+              labelPlacement='end'
+              label='From url pathName'
+            />
+          )}
+        />
+
+        <TextField
+          variant='standard'
+          label='From url query params'
+          {...register('externalId.urlQueryParams')}
+        />
+      </Stack>
 
       <Button variant='contained' type='submit'>
         Save

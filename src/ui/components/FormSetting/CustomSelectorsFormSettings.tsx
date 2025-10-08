@@ -15,7 +15,12 @@ import {
   setStorageValueByKey,
 } from '@utils/index';
 import React, { useEffect } from 'react';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import {
+  Controller,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+} from 'react-hook-form';
 import { IConfigData } from 'types/config.data';
 
 export function CustomSelectorsFormSettings() {
@@ -95,7 +100,7 @@ export function CustomSelectorsFormSettings() {
                   `selectors.selectorsOptions.${index}.keySelectorHtml`
                 )}
                 variant='standard'
-                placeholder='Selector HTML'
+                label='Selector HTML'
                 fullWidth
               />
               <TextField
@@ -103,13 +108,13 @@ export function CustomSelectorsFormSettings() {
                   `selectors.selectorsOptions.${index}.keyRelationToApi`
                 )}
                 variant='standard'
-                placeholder='Key Api'
+                label='Key Api'
                 fullWidth
               />
               <TextField
                 {...register(`selectors.selectorsOptions.${index}.order`)}
                 variant='standard'
-                placeholder='Order'
+                label='Order'
                 fullWidth
               />
 
@@ -118,30 +123,30 @@ export function CustomSelectorsFormSettings() {
               </IconButton>
             </Stack>
             <Stack direction='row' gap={1} alignItems='center'>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={field.isRequired}
-                    {...register(
-                      `selectors.selectorsOptions.${index}.isRequired`
-                    )}
+              <Controller
+                name={`selectors.selectorsOptions.${index}.isRequired`}
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={<Checkbox {...field} checked={field.value} />}
+                    labelPlacement='end'
+                    label='Required'
                   />
-                }
-                labelPlacement='top'
-                label='Required'
+                )}
               />
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={field.hasCheckForUnique}
-                    {...register(
-                      `selectors.selectorsOptions.${index}.hasCheckForUnique`
-                    )}
+              <Controller
+                name={`selectors.selectorsOptions.${index}.hasCheckForUnique`}
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={<Checkbox {...field} checked={field.value} />}
+                    labelPlacement='end'
+                    label='Unique'
                   />
-                }
-                labelPlacement='top'
-                label='Unique'
+                )}
               />
             </Stack>
           </Stack>
