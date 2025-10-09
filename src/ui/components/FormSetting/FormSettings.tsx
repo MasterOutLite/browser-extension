@@ -13,7 +13,7 @@ import { IConfigData } from '../../../types';
 export interface IFormSettingsProps {}
 
 export function FormSettings({}: IFormSettingsProps) {
-  const { register, handleSubmit, reset } = useForm<IConfigData>({
+  const { register, handleSubmit, reset, formState } = useForm<IConfigData>({
     defaultValues: {
       pandingTime: 15,
     },
@@ -28,8 +28,8 @@ export function FormSettings({}: IFormSettingsProps) {
 
     if (!tab.url) return;
     const domain = new URL(tab.url).hostname;
-
     await setDomainConfig(domain, data);
+    reset(data);
   };
 
   const handleRemoveAllState = async () => {
@@ -71,7 +71,12 @@ export function FormSettings({}: IFormSettingsProps) {
       />
 
       <Stack direction='row' gap={1}>
-        <Button variant='contained' type='submit' fullWidth>
+        <Button
+          variant='contained'
+          type='submit'
+          fullWidth
+          disabled={!formState.isDirty}
+        >
           Save
         </Button>
         <IconButton onClick={handleRemoveAllState}>

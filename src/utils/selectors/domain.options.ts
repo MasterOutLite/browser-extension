@@ -12,6 +12,28 @@ export const domainOptions: Record<string, IConfigSelector> = {
       urlQueryParams: ['jk'],
     },
   },
+  'dou.ua': {
+    cardSelector: 'ul[class="lt"]  > li',
+    nameSelector: 'a[class="vt"]',
+    refSelector: 'a[class="vt"]',
+    companySelector: 'a[class="company"]',
+    dateSelector: 'div[class="date"]',
+    externalId: {
+      fromLink: true,
+      urlPathName: true,
+    },
+  },
+  'djinni.co': {
+    cardSelector: 'ul > li[id^="job-item-"]',
+    nameSelector: 'h2 > a',
+    refSelector: 'h2 > a',
+    companySelector: 'a[data-analytics="company_page"]',
+    dateSelector: 'span[data-original-title]',
+    externalId: {
+      fromLink: true,
+      urlPathName: true,
+    },
+  },
 };
 
 export const domainOptionsKeys = Object.keys(domainOptions);

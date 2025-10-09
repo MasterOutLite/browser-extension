@@ -14,7 +14,7 @@ import {
   setDomainConfig,
   setStorageValueByKey,
 } from '@utils/index';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Controller,
   SubmitHandler,
@@ -24,7 +24,7 @@ import {
 import { IConfigData } from 'types/config.data';
 
 export function CustomSelectorsFormSettings() {
-  const { register, handleSubmit, reset, control, getValues } =
+  const { register, handleSubmit, reset, control, formState, getValues } =
     useForm<IConfigData>({});
 
   const { fields, append, remove } = useFieldArray({
@@ -40,6 +40,7 @@ export function CustomSelectorsFormSettings() {
     const domain = new URL(tab.url).hostname;
 
     await setDomainConfig(domain, data);
+    reset(data);
   };
 
   const handleRemoveAllState = async () => {
@@ -47,7 +48,8 @@ export function CustomSelectorsFormSettings() {
 
     if (!tab.url) return;
     const domain = new URL(tab.url).hostname;
-    setStorageValueByKey(domain, {}, { clear: true });
+    await setStorageValueByKey(domain, {}, { clear: true });
+    reset({});
   };
 
   async function getDate() {
@@ -153,7 +155,12 @@ export function CustomSelectorsFormSettings() {
         ))}
 
         <Stack direction='row' gap={1}>
-          <Button variant='contained' type='submit' fullWidth>
+          <Button
+            variant='contained'
+            type='submit'
+            fullWidth
+            disabled={!formState.isDirty}
+          >
             Save
           </Button>
           <IconButton onClick={handleRemoveAllState}>

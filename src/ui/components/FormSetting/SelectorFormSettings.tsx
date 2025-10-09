@@ -17,9 +17,10 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { IConfigSelector } from 'types/index';
 
 export function SelectorFormSettings() {
-  const { register, handleSubmit, reset, control } = useForm<IConfigSelector>({
-    defaultValues: {},
-  });
+  const { register, handleSubmit, reset, control, formState } =
+    useForm<IConfigSelector>({
+      defaultValues: {},
+    });
 
   const handleSubmitForm: SubmitHandler<IConfigSelector> = async (
     selectors,
@@ -30,8 +31,10 @@ export function SelectorFormSettings() {
 
     if (!tab.url) return;
     const domain = new URL(tab.url).hostname;
-
-    setStorageValueByKey(domain, { selectors });
+    await setStorageValueByKey(domain, {
+      selectors,
+    });
+    reset(selectors);
   };
 
   async function getDate() {
@@ -118,7 +121,7 @@ export function SelectorFormSettings() {
         />
       </Stack>
 
-      <Button variant='contained' type='submit'>
+      <Button variant='contained' type='submit' disabled={!formState.isDirty}>
         Save
       </Button>
     </Stack>

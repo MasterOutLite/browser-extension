@@ -1,18 +1,12 @@
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { Button, IconButton, Stack, TextField } from '@mui/material';
-import {
-  clearStorage,
-  getCurrentTab,
-  getStorageValue,
-  getStorageValueByKey,
-  setStorageValue,
-} from '@utils/index';
+import { clearStorage, getStorageValue, setStorageValue } from '@utils/index';
 import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IGlobalState } from 'types/config.data';
 
 export function GlobalSettings() {
-  const { register, handleSubmit, reset } = useForm<IGlobalState>({
+  const { register, handleSubmit, reset, formState } = useForm<IGlobalState>({
     defaultValues: {
       urlMacros: '',
     },
@@ -20,10 +14,8 @@ export function GlobalSettings() {
 
   const handleSubmitForm: SubmitHandler<IGlobalState> = async (data, e) => {
     e?.preventDefault();
-
     await setStorageValue(data);
-
-    console.log('Saved Global', data);
+    reset(data);
   };
 
   const handleRemoveAllState = async () => {
@@ -50,7 +42,12 @@ export function GlobalSettings() {
       />
 
       <Stack direction='row' gap={1}>
-        <Button variant='contained' type='submit' fullWidth>
+        <Button
+          variant='contained'
+          type='submit'
+          fullWidth
+          disabled={!formState.isDirty}
+        >
           Save
         </Button>
         <IconButton onClick={handleRemoveAllState}>
