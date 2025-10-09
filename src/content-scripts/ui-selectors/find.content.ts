@@ -1,4 +1,4 @@
-import { IConfigSelector } from 'types/index';
+import { ETagType, IConfigSelector, ISelector } from 'types/index';
 import { IApiList, IListElement, IListElementBase } from '../types';
 import { extractUniqueValue, formatElementToApi } from '../utils';
 
@@ -9,6 +9,7 @@ export function findContent(config: IConfigSelector) {
     refSelector,
     companySelector,
     dateSelector,
+    selectorsOptions,
   } = config;
   const foundCards: IApiList[] = [];
   const foundCardsElement: IListElement[] = [];
@@ -65,4 +66,43 @@ export function findContent(config: IConfigSelector) {
   });
 
   return { foundCards, foundCardsElement };
+}
+
+function findValuesByCustomSelector(
+  elements: NodeListOf<Element>,
+  options: ISelector[]
+) {
+  elements.entries().map(([_, card]) => {
+    options.map((config) => {
+      const {
+        keyRelationToApi,
+        keySelectorHtml,
+        order,
+        hasCheckForUnique,
+        isRequired,
+        tagType,
+      } = config;
+
+      if ([keySelectorHtml, keyRelationToApi, order].some((v) => !Boolean(v))) {
+        return null;
+      }
+      const element = card.querySelector(keySelectorHtml);
+
+      let value: string | undefined | null = '';
+
+      switch (tagType) {
+        case ETagType.Href:
+          value = element?.getAttribute('href');
+          break;
+        default:
+          value = element?.textContent;
+          break;
+      }
+
+      value = value || '';
+
+      return { value, element, config };
+    });
+    return;
+  });
 }

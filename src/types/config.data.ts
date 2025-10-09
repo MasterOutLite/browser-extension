@@ -27,6 +27,12 @@ export interface ISelector {
   order: number;
   isRequired?: boolean;
   hasCheckForUnique?: boolean;
+  tagType: ETagType;
+}
+
+export enum ETagType {
+  Href = 'href',
+  Text = 'text',
 }
 
 export interface IExternalID {

@@ -21,11 +21,29 @@ import {
   useFieldArray,
   useForm,
 } from 'react-hook-form';
-import { IConfigData } from 'types/config.data';
+import { ETagType, IConfigData, ISelector } from 'types/config.data';
+
+const defaultSelectors: ISelector[] = [
+  {
+    keyRelationToApi: 'url',
+    keySelectorHtml: '',
+    order: 0,
+    isRequired: true,
+    tagType: ETagType.Href,
+  },
+];
+
+const defaultKeys = defaultSelectors.map((s) => s.keyRelationToApi);
 
 export function CustomSelectorsFormSettings() {
   const { register, handleSubmit, reset, control, formState, getValues } =
-    useForm<IConfigData>({});
+    useForm<IConfigData>({
+      defaultValues: {
+        selectors: {
+          selectorsOptions: defaultSelectors,
+        },
+      },
+    });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -48,8 +66,13 @@ export function CustomSelectorsFormSettings() {
 
     if (!tab.url) return;
     const domain = new URL(tab.url).hostname;
-    await setStorageValueByKey(domain, {}, { clear: true });
-    reset({});
+    const newData = {
+      selectors: {
+        selectorsOptions: defaultSelectors,
+      },
+    };
+    await setStorageValueByKey(domain, newData);
+    reset(newData);
   };
 
   async function getDate() {
@@ -60,12 +83,39 @@ export function CustomSelectorsFormSettings() {
     const domain = new URL(tab.url).hostname;
     const config = await getDomainConfig(domain);
 
-    reset(config);
+    const selectorsOptions = config.selectors?.selectorsOptions ?? [];
+
+    const missingSelectors = defaultSelectors.filter(
+      (defaultSel) =>
+        !selectorsOptions.some(
+          (v) => v.keyRelationToApi === defaultSel.keyRelationToApi
+        )
+    );
+
+    const updatedSelectors = [...selectorsOptions, ...missingSelectors];
+
+    const newConfig = {
+      ...config,
+      selectors: {
+        ...config.selectors,
+        selectorsOptions: updatedSelectors,
+      },
+    };
+
+    reset(newConfig);
   }
 
   useEffect(() => {
     getDate();
   }, []);
+
+  const sortedSelectors = [...fields].sort((a, b) => {
+    const aIsDefault = defaultKeys.includes(a.keyRelationToApi);
+    const bIsDefault = defaultKeys.includes(b.keyRelationToApi);
+    if (aIsDefault && !bIsDefault) return -1;
+    if (!aIsDefault && bIsDefault) return 1;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
 
   return (
     <Stack gap='6px'>
@@ -82,6 +132,7 @@ export function CustomSelectorsFormSettings() {
               keySelectorHtml: '',
               keyRelationToApi: '',
               order: maxOrder,
+              tagType: ETagType.Text,
             });
           }}
         >
@@ -94,65 +145,74 @@ export function CustomSelectorsFormSettings() {
         gap='6px'
         onSubmit={handleSubmit(handleSubmitForm)}
       >
-        {fields.map((field, index) => (
-          <Stack key={field.id}>
-            <Stack direction='row' gap={1} alignItems='center'>
-              <TextField
-                {...register(
-                  `selectors.selectorsOptions.${index}.keySelectorHtml`
-                )}
-                variant='standard'
-                label='Selector HTML'
-                fullWidth
-              />
-              <TextField
-                {...register(
-                  `selectors.selectorsOptions.${index}.keyRelationToApi`
-                )}
-                variant='standard'
-                label='Key Api'
-                fullWidth
-              />
-              <TextField
-                {...register(`selectors.selectorsOptions.${index}.order`)}
-                variant='standard'
-                label='Order'
-                fullWidth
-              />
+        {sortedSelectors.map((field) => {
+          const index = fields.indexOf(field);
+          return (
+            <Stack key={field.id} borderBottom='1px solid #000'>
+              <Stack direction='row' gap={1} alignItems='center'>
+                <TextField
+                  {...register(
+                    `selectors.selectorsOptions.${index}.keySelectorHtml`
+                  )}
+                  variant='standard'
+                  label='Selector HTML'
+                  fullWidth
+                />
+                <TextField
+                  {...register(
+                    `selectors.selectorsOptions.${index}.keyRelationToApi`
+                  )}
+                  variant='standard'
+                  label='Key Api'
+                  fullWidth
+                />
+                <TextField
+                  {...register(`selectors.selectorsOptions.${index}.order`, {
+                    valueAsNumber: true,
+                    min: 1,
+                  })}
+                  variant='standard'
+                  label='Order'
+                  fullWidth
+                />
 
-              <IconButton onClick={() => remove(index)}>
-                <DeleteForeverIcon />
-              </IconButton>
-            </Stack>
-            <Stack direction='row' gap={1} alignItems='center'>
-              <Controller
-                name={`selectors.selectorsOptions.${index}.isRequired`}
-                control={control}
-                defaultValue={false}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={<Checkbox {...field} checked={field.value} />}
-                    labelPlacement='end'
-                    label='Required'
-                  />
-                )}
-              />
+                <IconButton
+                  onClick={() => remove(index)}
+                  disabled={defaultKeys.includes(field.keyRelationToApi)}
+                >
+                  <DeleteForeverIcon />
+                </IconButton>
+              </Stack>
+              <Stack direction='row' gap={1} alignItems='center'>
+                <Controller
+                  name={`selectors.selectorsOptions.${index}.isRequired`}
+                  control={control}
+                  defaultValue={false}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Checkbox {...field} checked={field.value} />}
+                      labelPlacement='end'
+                      label='Required'
+                    />
+                  )}
+                />
 
-              <Controller
-                name={`selectors.selectorsOptions.${index}.hasCheckForUnique`}
-                control={control}
-                defaultValue={false}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={<Checkbox {...field} checked={field.value} />}
-                    labelPlacement='end'
-                    label='Unique'
-                  />
-                )}
-              />
+                {/* <Controller
+                  name={`selectors.selectorsOptions.${index}.hasCheckForUnique`}
+                  control={control}
+                  defaultValue={false}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Checkbox {...field} checked={field.value} />}
+                      labelPlacement='end'
+                      label='Unique'
+                    />
+                  )}
+                /> */}
+              </Stack>
             </Stack>
-          </Stack>
-        ))}
+          );
+        })}
 
         <Stack direction='row' gap={1}>
           <Button
@@ -170,4 +230,7 @@ export function CustomSelectorsFormSettings() {
       </Stack>
     </Stack>
   );
+}
+function watch(arg0: string) {
+  throw new Error('Function not implemented.');
 }

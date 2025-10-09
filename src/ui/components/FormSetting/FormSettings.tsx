@@ -8,6 +8,7 @@ import {
 } from '@utils/index';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import browser from 'webextension-polyfill';
 import { IConfigData } from '../../../types';
 
 export interface IFormSettingsProps {}
@@ -51,6 +52,19 @@ export function FormSettings({}: IFormSettingsProps) {
     reset(config);
   }
 
+  async function handleRemoveLocalStorage() {
+    const tab = await getCurrentTab();
+
+    if (!tab.url) return;
+
+    await browser.scripting.executeScript({
+      target: { tabId: tab.id! },
+      func: () => {
+        window.localStorage.clear();
+      },
+    });
+  }
+
   useEffect(() => {
     getDate();
   }, []);
@@ -70,6 +84,14 @@ export function FormSettings({}: IFormSettingsProps) {
         {...register('pandingTime', { valueAsNumber: true })}
       />
 
+      <Button
+        variant='contained'
+        type='submit'
+        fullWidth
+        onClick={handleRemoveLocalStorage}
+      >
+        Remove local state
+      </Button>
       <Stack direction='row' gap={1}>
         <Button
           variant='contained'
