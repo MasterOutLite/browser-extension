@@ -2,10 +2,10 @@ import { IConfigSelector } from '@types/index';
 
 export const domainOptions: Record<string, IConfigSelector> = {
   'indeed.com': {
-    cardSelector: 'ul > li',
+    cardSelector: 'div[id="mosaic-provider-jobcards"] > ul > li',
     nameSelector: 'span[id^="jobTitle-"]',
     refSelector: 'a[id^="job_"]',
-    companySelector: '',
+    companySelector: 'span[data-testid^="company-name"]',
     dateSelector: '',
     externalId: {
       fromLink: true,
