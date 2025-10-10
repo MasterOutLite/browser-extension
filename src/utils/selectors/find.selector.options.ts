@@ -1,4 +1,4 @@
-import { IConfigSelector } from 'types/index';
+import { IConfigSelector } from '@types/index';
 import { domainOptions, domainOptionsKeys } from './domain.options';
 
 export function getMainDomain(domain: string): string {

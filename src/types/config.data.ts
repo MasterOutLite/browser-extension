@@ -1,3 +1,5 @@
+import { ETagType } from './message.type';
+
 export interface IGlobalState
   extends Record<string, any>,
     Record<string, IConfigData> {
@@ -28,11 +30,6 @@ export interface ISelector {
   isRequired?: boolean;
   hasCheckForUnique?: boolean;
   tagType: ETagType;
-}
-
-export enum ETagType {
-  Href = 'href',
-  Text = 'text',
 }
 
 export interface IExternalID {

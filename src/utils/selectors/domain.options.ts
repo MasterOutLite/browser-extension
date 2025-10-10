@@ -1,4 +1,4 @@
-import { IConfigSelector } from 'types/index';
+import { IConfigSelector } from '@types/index';
 
 export const domainOptions: Record<string, IConfigSelector> = {
   'indeed.com': {

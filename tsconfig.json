@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "types": ["chrome"],
     "strict": true,
     "resolveJsonModule": true,

@@ -1,4 +1,4 @@
-import { ETagType, IConfigSelector, ISelector } from 'types/index';
+import { ETagType, IConfigSelector, ISelector } from '@types/index';
 import { IApiList, IListElement, IListElementBase } from '../types';
 import { extractUniqueValue, formatElementToApi } from '../utils';
 

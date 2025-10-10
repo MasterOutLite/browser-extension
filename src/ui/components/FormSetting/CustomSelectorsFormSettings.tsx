@@ -21,7 +21,7 @@ import {
   useFieldArray,
   useForm,
 } from 'react-hook-form';
-import { ETagType, IConfigData, ISelector } from 'types/config.data';
+import { ETagType, IConfigData, ISelector } from '@types/index';
 
 const defaultSelectors: ISelector[] = [
   {

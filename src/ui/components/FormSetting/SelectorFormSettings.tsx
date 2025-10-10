@@ -6,6 +6,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { IConfigSelector } from '@types/index';
 import {
   getCurrentTab,
   getDomainConfig,
@@ -14,12 +15,18 @@ import {
 } from '@utils/index';
 import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { IConfigSelector } from 'types/index';
 
 export function SelectorFormSettings() {
   const { register, handleSubmit, reset, control, formState } =
     useForm<IConfigSelector>({
-      defaultValues: {},
+      defaultValues: {
+        cardSelector: '',
+        nameSelector: '',
+        refSelector: '',
+        dateSelector: '',
+        companySelector: '',
+        externalId: { fromLink: false, urlPathName: false },
+      },
     });
 
   const handleSubmitForm: SubmitHandler<IConfigSelector> = async (

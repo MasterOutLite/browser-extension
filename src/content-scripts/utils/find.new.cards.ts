@@ -1,4 +1,4 @@
-import { IConfigSelector } from 'types/index';
+import { IConfigSelector } from '@types/index';
 import { IListElement, IListElementBase, IStoredList } from '../types';
 import { formatElementForSave } from './format.data';
 
