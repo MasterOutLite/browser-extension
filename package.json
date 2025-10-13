@@ -6,7 +6,8 @@
   "scripts": {
     "compile": "tsc --noEmit",
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build --mode development",
+    "build:prod": "vite build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

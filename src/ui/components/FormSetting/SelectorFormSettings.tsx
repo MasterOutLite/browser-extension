@@ -2,64 +2,56 @@ import {
   Button,
   Checkbox,
   FormControlLabel,
+  IconButton,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
 import { IConfigSelector } from '@types/index';
-import {
-  getCurrentTab,
-  getDomainConfig,
-  getDomainOptions,
-  setStorageValueByKey,
-} from '@utils/index';
 import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { useBrowserStore } from '../../store';
+import { getDomainOptions } from '@utils/index';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 
 export function SelectorFormSettings() {
-  const { register, handleSubmit, reset, control, formState } =
-    useForm<IConfigSelector>({
-      defaultValues: {
-        cardSelector: '',
-        nameSelector: '',
-        refSelector: '',
-        dateSelector: '',
-        companySelector: '',
-        externalId: { fromLink: false, urlPathName: false },
-      },
-    });
+  const { state, domain, loading, setValue } = useBrowserStore();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue: setValueForm,
+
+    control,
+    formState,
+  } = useForm<IConfigSelector>({
+    defaultValues: {},
+  });
 
   const handleSubmitForm: SubmitHandler<IConfigSelector> = async (
     selectors,
     e
   ) => {
     e?.preventDefault();
-    const tab = await getCurrentTab();
-
-    if (!tab.url) return;
-    const domain = new URL(tab.url).hostname;
-    await setStorageValueByKey(domain, {
-      selectors,
-    });
+    await setValue({ selectors });
     reset(selectors);
   };
 
-  async function getDate() {
-    const tab = await getCurrentTab();
-
-    if (!tab.url) return;
-
-    const domain = new URL(tab.url).hostname;
-
-    const config = await getDomainConfig(domain);
-    const selectors = getDomainOptions(domain, config.selectors || {});
-
-    reset(selectors);
-  }
+  const handleSetDefault = () => {
+    const defaultSelectors = getDomainOptions(domain);
+    Object.entries(defaultSelectors).forEach(([key, value]) => {
+      setValueForm(key as keyof IConfigSelector, value, { shouldDirty: true });
+    });
+  };
 
   useEffect(() => {
-    getDate();
-  }, []);
+    if (loading) return;
+
+    console.log('Reset new val');
+
+    reset(state?.selectors);
+  }, [state]);
 
   return (
     <Stack component='form' gap='6px' onSubmit={handleSubmit(handleSubmitForm)}>
@@ -128,9 +120,19 @@ export function SelectorFormSettings() {
         />
       </Stack>
 
-      <Button variant='contained' type='submit' disabled={!formState.isDirty}>
-        Save
-      </Button>
+      <Stack direction='row' gap={2}>
+        <Button
+          variant='contained'
+          type='submit'
+          fullWidth
+          disabled={!formState.isDirty}
+        >
+          Save
+        </Button>
+        <IconButton color='warning' onClick={handleSetDefault}>
+          <RotateLeftIcon />
+        </IconButton>
+      </Stack>
     </Stack>
   );
 }

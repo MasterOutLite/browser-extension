@@ -7,7 +7,7 @@ export function getMainDomain(domain: string): string {
 
 export function getDomainOptions(
   domain: string,
-  extendOptions: Partial<IConfigSelector>
+  extendOptions?: Partial<IConfigSelector>
 ): IConfigSelector {
   const mainDomain = getMainDomain(domain);
 

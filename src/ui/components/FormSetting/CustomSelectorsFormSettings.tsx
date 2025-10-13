@@ -8,12 +8,8 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import {
-  getCurrentTab,
-  getDomainConfig,
-  setDomainConfig,
-  setStorageValueByKey,
-} from '@utils/index';
+import { ETagType, IConfigData, ISelector } from '@types/index';
+import { setStorageValueByKey } from '@utils/index';
 import { useEffect } from 'react';
 import {
   Controller,
@@ -21,7 +17,7 @@ import {
   useFieldArray,
   useForm,
 } from 'react-hook-form';
-import { ETagType, IConfigData, ISelector } from '@types/index';
+import { useBrowserStore } from '../../store';
 
 const defaultSelectors: ISelector[] = [
   {
@@ -36,6 +32,7 @@ const defaultSelectors: ISelector[] = [
 const defaultKeys = defaultSelectors.map((s) => s.keyRelationToApi);
 
 export function CustomSelectorsFormSettings() {
+  const { state, domain, loading, setValue } = useBrowserStore();
   const { register, handleSubmit, reset, control, formState, getValues } =
     useForm<IConfigData>({
       defaultValues: {
@@ -52,20 +49,11 @@ export function CustomSelectorsFormSettings() {
 
   const handleSubmitForm: SubmitHandler<IConfigData> = async (data, e) => {
     e?.preventDefault();
-    const tab = await getCurrentTab();
 
-    if (!tab.url) return;
-    const domain = new URL(tab.url).hostname;
-
-    await setDomainConfig(domain, data);
-    reset(data);
+    await setValue(data);
   };
 
   const handleRemoveAllState = async () => {
-    const tab = await getCurrentTab();
-
-    if (!tab.url) return;
-    const domain = new URL(tab.url).hostname;
     const newData = {
       selectors: {
         selectorsOptions: defaultSelectors,
@@ -75,15 +63,9 @@ export function CustomSelectorsFormSettings() {
     reset(newData);
   };
 
-  async function getDate() {
-    const tab = await getCurrentTab();
-
-    if (!tab.url) return;
-
-    const domain = new URL(tab.url).hostname;
-    const config = await getDomainConfig(domain);
-
-    const selectorsOptions = config.selectors?.selectorsOptions ?? [];
+  useEffect(() => {
+    if (loading) return;
+    const selectorsOptions = state.selectors?.selectorsOptions ?? [];
 
     const missingSelectors = defaultSelectors.filter(
       (defaultSel) =>
@@ -95,19 +77,15 @@ export function CustomSelectorsFormSettings() {
     const updatedSelectors = [...selectorsOptions, ...missingSelectors];
 
     const newConfig = {
-      ...config,
+      ...state,
       selectors: {
-        ...config.selectors,
+        ...state.selectors,
         selectorsOptions: updatedSelectors,
       },
     };
 
     reset(newConfig);
-  }
-
-  useEffect(() => {
-    getDate();
-  }, []);
+  }, [state]);
 
   const sortedSelectors = [...fields].sort((a, b) => {
     const aIsDefault = defaultKeys.includes(a.keyRelationToApi);

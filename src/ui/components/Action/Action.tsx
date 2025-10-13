@@ -1,13 +1,13 @@
 import { Button, Stack } from '@mui/material';
-import { setDomainConfig } from '@utils/storage';
 import { getCurrentTab } from '@utils/tabs';
 import browser from 'webextension-polyfill';
+import { useBrowserStore } from '../../store';
 
 export function Action() {
-  const handleStartWorker = async () => {
-    const tab = await getCurrentTab();
+  const { state, loading, setValue } = useBrowserStore();
 
-    if (!tab.url) return;
+  const handleStartWorker = async () => {
+    const { tab } = await getCurrentTab();
 
     const alreadyInjected = await browser.scripting.executeScript({
       target: { tabId: tab.id! },
@@ -22,8 +22,7 @@ export function Action() {
       });
     }
 
-    const domain = new URL(tab.url).hostname;
-    await setDomainConfig(domain, { scraperRunning: true });
+    await setValue({ scraperRunning: true });
 
     browser.scripting.executeScript({
       target: { tabId: tab.id! },
@@ -36,26 +35,26 @@ export function Action() {
   };
 
   const handlStopWorker = async () => {
-    const tab = await getCurrentTab();
-    if (!tab.url) return;
-
-    const domain = new URL(tab.url).hostname;
-    setDomainConfig(domain, { scraperRunning: false });
+    setValue({ scraperRunning: false });
   };
 
   const handleCloseWindow = () => {
     window.close();
   };
 
+  if (loading) return null;
   return (
-    <Stack direction='row' justifyContent='space-between' pt={2}>
-      <Button variant='contained' onClick={handleStartWorker}>
-        Start
-      </Button>
-      <Button variant='contained' onClick={handlStopWorker}>
-        Stop
-      </Button>
-      <Button variant='contained' onClick={handleCloseWindow}>
+    <Stack direction='row' pt={2} gap={2}>
+      {state?.scraperRunning ? (
+        <Button variant='contained' onClick={handlStopWorker} fullWidth>
+          Stop
+        </Button>
+      ) : (
+        <Button variant='contained' onClick={handleStartWorker} fullWidth>
+          Start
+        </Button>
+      )}
+      <Button variant='contained' onClick={handleCloseWindow} fullWidth>
         Close
       </Button>
     </Stack>

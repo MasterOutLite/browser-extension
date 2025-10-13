@@ -29,4 +29,7 @@ export default defineConfig({
       '@types': path.resolve(__dirname, 'src/types'),
     },
   },
+  define: {
+    NODE_ENV: 'DEV', // "PROD"
+  },
 });

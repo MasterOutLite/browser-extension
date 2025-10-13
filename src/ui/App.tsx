@@ -30,8 +30,11 @@ const localRoutes: ILocalRoute[] = [
   { value: ETabs.Main, icon: <HomeIcon /> },
   { value: ETabs.PageSettings, icon: <NewspaperIcon /> },
   { value: ETabs.GlobalSettings, icon: <PublicIcon /> },
-  { value: ETabs.CustomSelectorsSettings, icon: <AutoFixHighIcon /> },
-];
+  import.meta.env.MODE === 'development' && {
+    value: ETabs.CustomSelectorsSettings,
+    icon: <AutoFixHighIcon />,
+  },
+].filter(Boolean) as ILocalRoute[];
 
 const tabsRender: Record<ETabs, () => React.ReactNode> = {
   [ETabs.Main]: () => <FormSettings />,

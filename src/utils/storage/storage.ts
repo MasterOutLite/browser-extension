@@ -5,7 +5,7 @@ export interface IStorageValue {
   clear?: boolean;
 }
 
-export async function getStorageValue<T extends any>(key: string) {
+export async function getStorageValue<T extends any>(key?: string) {
   if (!browser?.storage?.local?.get)
     console.log('Empty browser setDomainConfig: ', browser);
 
